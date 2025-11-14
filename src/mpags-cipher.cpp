@@ -56,26 +56,32 @@ std::string transformChar( const char in_char){
 }
 
 
-int main(int argc, char* argv[])
-{
-    // Convert the command-line arguments into a more easily usable form
-    const std::vector<std::string> cmdLineArgs{argv, argv + argc};
-    const std::size_t nCmdLineArgs{cmdLineArgs.size()};
+bool processCommandLine(const std::vector<std::string>& args,
+    bool& helpRequested,
+    bool& versionRequested, 
+    std::string& inputFileName,
+    std::string& outputFileName)
+    {
 
-    // Options that might be set by the command-line arguments
-    bool helpRequested{false};
-    bool versionRequested{false};
-    std::string inputFile{""};
-    std::string outputFile{""};
+        /*Processes argmuents and flags given to mpags-cipher
 
+        const std::vector<std::string>& args: vector of arguments taken from the command line
+        bool& helpRequested: flag to trigger help message to appear
+        bool& versionRequested: flag to trigger version message
+        std::string& inputFileName: name of file to take cipher input from (NOT IMPLEMENTED)
+        std::string& outputFileName: name of file to place cipher output (NOT IMPLEMENTED)
+
+        return: 0 with success 1 with failiure
+        */
+    const std::size_t nCmdLineArgs{args.size()};    
     // Process command line arguments - ignore zeroth element, as we know this
     // to be the program name and don't need to worry about it
     for (std::size_t i{1}; i < nCmdLineArgs; ++i) {
-        if (cmdLineArgs[i] == "-h" || cmdLineArgs[i] == "--help") {
+        if (args[i] == "-h" || args[i] == "--help") {
             helpRequested = true;
-        } else if (cmdLineArgs[i] == "--version") {
+        } else if (args[i] == "--version") {
             versionRequested = true;
-        } else if (cmdLineArgs[i] == "-i") {
+        } else if (args[i] == "-i") {
             // Handle input file option
             // Next element is filename unless "-i" is the last argument
             if (i == nCmdLineArgs - 1) {
@@ -85,10 +91,10 @@ int main(int argc, char* argv[])
                 return 1;
             } else {
                 // Got filename, so assign value and advance past it
-                inputFile = cmdLineArgs[i + 1];
+                inputFileName = args[i + 1];
                 ++i;
             }
-        } else if (cmdLineArgs[i] == "-o") {
+        } else if (args[i] == "-o") {
             // Handle output file option
             // Next element is filename unless "-o" is the last argument
             if (i == nCmdLineArgs - 1) {
@@ -98,17 +104,32 @@ int main(int argc, char* argv[])
                 return 1;
             } else {
                 // Got filename, so assign value and advance past it
-                outputFile = cmdLineArgs[i + 1];
+                outputFileName = args[i + 1];
                 ++i;
             }
         } else {
             // Have an unknown flag to output error message and return non-zero
             // exit status to indicate failure
-            std::cerr << "[error] unknown argument '" << cmdLineArgs[i]
+            std::cerr << "[error] unknown argument '" << args[i]
                       << "'\n";
             return 1;
         }
     }
+    return 0;
+    }
+
+int main(int argc, char* argv[])
+{
+    // Options that might be set by the command-line arguments
+    bool helpRequested{false};
+    bool versionRequested{false};
+    std::string inputFileName{""};
+    std::string outputFileName{""};
+
+    // Convert the command-line arguments into a more easily usable form
+    const std::vector<std::string> cmdLineArgs{argv, argv + argc};
+
+    processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFileName, outputFileName);
 
     // Handle help, if requested
     if (helpRequested) {
@@ -143,8 +164,8 @@ int main(int argc, char* argv[])
 
     // Read in user input from stdin/file
     // Warn that input file option not yet implemented
-    if (!inputFile.empty()) {
-        std::cerr << "[warning] input from file ('" << inputFile
+    if (!inputFileName.empty()) {
+        std::cerr << "[warning] input from file ('" << inputFileName
                   << "') not implemented yet, using stdin\n";
     }
 
@@ -154,14 +175,15 @@ int main(int argc, char* argv[])
 
     }
 
-    // Print out the transliterated text
+   
 
     // Warn that output file option not yet implemented
-    if (!outputFile.empty()) {
-        std::cerr << "[warning] output to file ('" << outputFile
+    if (!outputFileName.empty()) {
+        std::cerr << "[warning] output to file ('" << outputFileName
                   << "') not implemented yet, using stdout\n";
     }
 
+     // Print out the transliterated text
     std::cout << inputText << std::endl;
 
     // No requirement to return from main, but we do so for clarity
